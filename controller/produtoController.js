@@ -1,38 +1,55 @@
 import {Produto} from '../model/produto.js';
-import {atualizar, buscarPorIndice, cadastrar, deletar, listar} from '../repository/produtoRepository.js';
+import {atualizar, buscarPorId, cadastrar, deletar, listar} from '../repository/produtoRepository.js';
 
-export function cadastrarProduto(req, res) {
+export  async function cadastrarProduto(req, res) {
+
+    try{
     const {descricao, preco, peso} = req.body;
-
+    if(!descricao || !preco || !peso) {
+        return res.status(400).json({mensagem: 'Todos os campos são obrigatórios!'});
+    }
     const produto = new Produto(descricao, preco, peso);
 
+    const id = await cadastrar(produto);
+    
     cadastrar(produto);
 
-    res.status(201).json({mensagem: 'Produto cadastrado com sucesso!'});
+    res.status(201).json({mensagem: 'Produto cadastrado com sucesso!', id_produto: id});
+    }catch(erro) {
+        res.status(500).json({mensagem: 'Erro ao cadastrar produto!' + erro});
+    }
 }
 
-export function listarProdutos(req, res) {
-    const listaDeProdutos = listar();
-
-    res.status(200).json(listaDeProdutos);
+export async function listarProdutos(req, res) {
+    try{
+        const listaDeProdutos = await listar();
+        res.status(200).json(listaDeProdutos);
+    } catch(erro) {
+        res.status(500).json({mensagem: 'Erro ao listar produtos!' + erro});
+    }
 }
 
-export function buscarProdutoPorIndice(req, res) {
-    const indice = Number(req.params.indice);
+export async function buscarProdutoPorId(req, res) {
+    try{
+    const id = Number(req.params.id);
     
-    buscarPorIndice(indice);
+    const produto = await buscarPorId(id);
 
-    const produto = buscarPorIndice(indice);
     if(!produto) {
        return res.status(404).json({mensagem: 'Produto não encontrado!'});
     }
     res.status(200).json(produto);
+    }catch(erro) {
+        res.status(500).json({mensagem: 'Erro ao buscar produto!' + erro});
+    }
 }
 
-export function atualizarProduto(req, res) {
-    const indice = Number(req.params.indice);
+export async function atualizarProduto(req, res) {
+    try{
+    const id = Number(req.params.id);
 
-    const produto = buscarPorIndice(indice);
+    const produto = await buscarPorId(id);
+
     if(!produto) {
         return res.status(404).json({mensagem: 'Produto não encontrado!'});
     }
@@ -47,21 +64,38 @@ export function atualizarProduto(req, res) {
         produto.peso = peso;
     }
 
-    atualizar(indice, produto);
+    const resultado = await atualizar(id, produto); 
+
+    if(resultado === 0) {
+        return res.status(500).json({mensagem: 'Nenhum produto atualizado!'});
+    }
 
     res.status(200).json({mensagem: 'Produto atualizado com sucesso!'});
+    
+    }catch(erro) {
+        res.status(500).json({mensagem: 'Erro ao atualizar produto!' + erro});
+    }
 }
 
-export function deletarProduto(req, res) {
-    const indice = Number(req.params.indice);
+export async function deletarProduto(req, res) {
+    try{
+    const id = Number(req.params.id);
 
-    const produto = buscarPorIndice(indice);
+    const produto = await buscarPorId(id);
+    
 
     if(!produto) {
         return res.status(404).json({mensagem: 'Produto não encontrado!'});
     }
 
-    deletar(indice);
+    const resultado = await deletar(id);
+
+    if(resultado === 0) {
+        return res.status(500).json({mensagem: 'Nenhum produto deletado!'});
+    }
 
     res.status(204).json({mensagem: 'Produto deletado com sucesso!'});
+    }catch(erro) {
+        res.status(500).json({mensagem: 'Erro ao deletar produto!' + erro});
+    }
 }
