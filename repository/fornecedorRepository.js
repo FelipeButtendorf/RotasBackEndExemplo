@@ -1,21 +1,32 @@
-const fornecedores = []
+import conexao from '../config/conexao.js';
 
-export function cadastrar(fornecedor) {
-    fornecedores.push(fornecedor)
+export async function cadastrar(fornecedor) {
+    const sql = 'INSERT INTO fornecedores (nome, cnpj, telefone) VALUES (?, ?, ?)';
+    const [resultado] = await conexao.execute(sql, [fornecedor.nome, fornecedor.cnpj, fornecedor.telefone]);
+    return resultado.insertId;
 }
 
-export function listar() {
-    return fornecedores
+export async function listar() {
+    const sql = 'SELECT * FROM fornecedores';
+    const [resultado] = await conexao.execute(sql);
+    return resultado;
 }
 
-export function buscarPorIndice(indice) {
-    return fornecedores[indice]
+export async function buscarPorId(id) {
+    const sql = 'SELECT * FROM fornecedores WHERE id_fornecedor = ?';
+    const [resultado] = await conexao.execute(sql, [id]);
+    return resultado[0];
 }
 
-export function atualizar(indice, fornecedor) {
-    fornecedores[indice] = fornecedor
+export async function atualizar(id, fornecedor) {
+    const sql = 'UPDATE fornecedores SET nome = ?, cnpj = ?, telefone = ? WHERE id_fornecedor = ?';
+    const [resultado] = await conexao.execute(sql, [fornecedor.nome, fornecedor.cnpj, fornecedor.telefone, id]);
+    return resultado.affectedRows;
 }
 
-export function deletar(indice) {
-    fornecedores.splice(indice, 1)
+export async function deletar(id) {
+    const sql = 'DELETE FROM fornecedores WHERE id_fornecedor = ?';
+    const [resultado] = await conexao.execute(sql, [id]);
+    return resultado.affectedRows;
 }
+

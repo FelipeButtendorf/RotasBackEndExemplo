@@ -11,8 +11,6 @@ export  async function cadastrarProduto(req, res) {
     const produto = new Produto(descricao, preco, peso);
 
     const id = await cadastrar(produto);
-    
-    cadastrar(produto);
 
     res.status(201).json({mensagem: 'Produto cadastrado com sucesso!', id_produto: id});
     }catch(erro) {
@@ -56,11 +54,13 @@ export async function atualizarProduto(req, res) {
 
     const {descricao, preco, peso} = req.body;
 
-    if(descricao != undefined) {
+    if(descricao !== undefined) {
         produto.descricao = descricao;
-    }else if(preco != undefined) {
+    }
+    if(preco !== undefined) {
         produto.preco = preco;
-    }else if(peso != undefined) {
+    }
+    if(peso !== undefined) {
         produto.peso = peso;
     }
 
@@ -94,7 +94,7 @@ export async function deletarProduto(req, res) {
         return res.status(500).json({mensagem: 'Nenhum produto deletado!'});
     }
 
-    res.status(204).json({mensagem: 'Produto deletado com sucesso!'});
+    res.status(200).json({mensagem: 'Produto deletado com sucesso!'});
     }catch(erro) {
         res.status(500).json({mensagem: 'Erro ao deletar produto!' + erro});
     }
